@@ -8,7 +8,7 @@
           <div class="p-2 bg-slate-900 text-white rounded-lg">
             <Box class="w-5 h-5" />
           </div>
-          <span class="font-bold text-slate-800 text-lg">Inventario Pro</span>
+          <span class="font-bold text-slate-800 text-lg">InvSmart</span>
         </div>
 
         <nav class="space-y-1">
@@ -44,23 +44,9 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-1 p-8 overflow-y-auto">
       
-      <!-- TOPBAR SUPERIOR -->
       <header class="flex justify-between items-center mb-8">
-        <div class="relative w-96">
-          <Search class="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-          <input type="text" placeholder="Buscar en el sistema..." class="w-full pl-10 pr-4 py-2 bg-white rounded-full text-sm border border-slate-200 focus:outline-none focus:border-slate-400" />
-        </div>
-
-        <div class="flex items-center gap-4">
-          <button class="p-2 bg-white border border-slate-200 rounded-full text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <Bell class="w-4 h-4" />
-          </button>
-          <div class="flex items-center gap-3 pl-2">
-            <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
-              A
-            </div>
-            <span class="text-sm font-medium text-slate-700">Admin</span>
-          </div>
+        <div class="flex items-center gap-3 bg-white p-1.5 px-3 border border-slate-200 rounded-full">
+                      <option value="Administrador">Administrador</option>
         </div>
       </header>
 
@@ -69,10 +55,13 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 class="text-2xl font-bold text-slate-900">Catálogo de Productos</h1>
-            <p class="text-xs text-slate-400 mt-1">Valor Total Almacén: <strong class="text-emerald-600">S/. {{ dashboard.valor_total || 0 }}</strong></p>
+            <p class="text-xs text-slate-400 mt-1">
+              Capital Invertido: <strong class="text-emerald-600">S/. {{ dashboard.valor_inversion || 0 }}</strong>
+            </p>
           </div>
 
-          <div class="flex items-center gap-3">
+          <!-- BOTÓN SOLO VISIBLE PARA ADMINISTRADORES -->
+          <div v-if="rolActivo === 'Administrador'" class="flex items-center gap-3">
             <button @click="productoAEditar = null; abrirModal = true" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800 flex items-center gap-2 shadow-sm cursor-pointer">
               <Plus class="w-4 h-4" /> Añadir Producto
             </button>
@@ -92,12 +81,12 @@
           </select>
         </div>
 
-        <!-- GRILLA DE TARJETAS DE PRODUCTO -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <ProductCard 
             v-for="prod in productosFiltrados" 
             :key="prod.id" 
             :producto="prod" 
+            :rol="rolActivo"
             @modificar-stock="modificarStock" 
             @editar-producto="prepararEdicion"
             @eliminar-producto="eliminarProducto"
@@ -105,15 +94,12 @@
         </div>
       </div>
 
-      <!-- VISTA DE KÁRDEX -->
       <KardexView v-else-if="vistaActual === 'kardex'" :kardex="kardex" />
 
-      <!-- VISTA DE REPORTES -->
       <ReportsView v-else-if="vistaActual === 'reportes'" :dashboard="dashboard" />
 
     </main>
 
-    <!-- MODAL DE CREACIÓN / EDICIÓN -->
     <AddProductModal 
       :isOpen="abrirModal" 
       :productoEdit="productoAEditar"
@@ -127,7 +113,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import { Box, Package, History, FileText, Settings, LogOut, Search, Bell, Plus } from 'lucide-vue-next'
+import { Box, Package, History, FileText, Settings, Search, Plus } from 'lucide-vue-next'
 import ProductCard from './components/ProductCard.vue'
 import AddProductModal from './components/AddProductModal.vue'
 import ReportsView from './components/ReportsView.vue'
@@ -135,6 +121,7 @@ import KardexView from './components/KardexView.vue'
 
 const API_URL = 'http://127.0.0.1:8000/api'
 
+const rolActivo = ref('Administrador')
 const vistaActual = ref('productos')
 const abrirModal = ref(false)
 const productoAEditar = ref(null)
@@ -187,8 +174,18 @@ const eliminarProducto = async (id) => {
 }
 
 const modificarStock = async (id, cantidad) => {
+  const motivoIngresado = prompt(
+    cantidad > 0 ? "Ingrese el motivo de la ENTRADA de stock:" : "Ingrese el motivo de la SALIDA de stock:",
+    cantidad > 0 ? "Compra a proveedor" : "Venta / Despacho"
+  )
+  if (!motivoIngresado) return
+
   try {
-    await axios.post(`${API_URL}/productos/${id}/movimiento`, { cantidad, motivo: "Ajuste rápido desde catálogo" })
+    await axios.post(`${API_URL}/productos/${id}/movimiento`, { 
+      cantidad, 
+      motivo: motivoIngresado,
+      usuario: rolActivo.value
+    })
     await cargarDatos()
   } catch (err) {
     alert(err.response?.data?.detail || "Error al modificar stock")
@@ -197,7 +194,7 @@ const modificarStock = async (id, cantidad) => {
 
 const productosFiltrados = computed(() => {
   return productos.value.filter(p => {
-    const coincideBusqueda = p.nombre.toLowerCase().includes(filtroBusqueda.value.toLowerCase()) || p.codigo_sku.toLowerCase().includes(filtroBusqueda.value.toLowerCase())
+    const coincideBusqueda = p.nombre.toLowerCase().includes(filtroBusqueda.value.toLowerCase()) || p.sku.toLowerCase().includes(filtroBusqueda.value.toLowerCase())
     const coincideCat = categoriaSeleccionada.value === '' || p.categoria === categoriaSeleccionada.value
     return coincideBusqueda && coincideCat
   })

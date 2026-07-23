@@ -2,7 +2,6 @@
   <div class="space-y-6 animate-fade-in">
     <div>
       <h1 class="text-2xl font-bold text-slate-900">Historial de Movimientos (Kárdex)</h1>
-      <p class="text-xs text-slate-400 mt-1">Trazabilidad en tiempo real de entradas y salidas de almacén</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
@@ -10,12 +9,13 @@
         <table class="w-full text-left text-xs text-slate-600">
           <thead class="bg-slate-50 text-slate-400 uppercase font-semibold border-b border-slate-100">
             <tr>
-              <th class="p-3">ID</th>
-              <th class="p-3">Fecha y Hora</th>
+              <th class="p-3">ID Mov</th>
+              <th class="p-3">Fecha / Hora</th>
               <th class="p-3">Producto</th>
               <th class="p-3">Tipo</th>
               <th class="p-3">Cantidad</th>
               <th class="p-3">Motivo / Justificación</th>
+              <th class="p-3">Usuario</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -32,9 +32,12 @@
                 </span>
               </td>
               <td class="p-3 font-bold text-slate-900">
-                {{ item.tipo === 'ENTRADA' ? '+' : '-' }}{{ item.cantidad }}
+                {{ item.tipo === 'ENTRADA' ? '+' : '-' }}{{ item.cantidad }} u.
               </td>
-              <td class="p-3 text-slate-500 italic">{{ item.motivo }}</td>
+              <td class="p-3 text-slate-600 italic">{{ item.motivo }}</td>
+              <td class="p-3 font-medium text-slate-500">
+                <span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px]">{{ item.usuario || 'Admin' }}</span>
+              </td>
             </tr>
           </tbody>
         </table>

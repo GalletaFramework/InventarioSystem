@@ -7,7 +7,6 @@ class InventarioAnalytics:
 
     @staticmethod
     def calcular_valor_total_inversion(productos: List[Producto]) -> float:
-        """Calcula la inversión total a precio de costo usando map y reduce."""
         if not productos:
             return 0.0
         costos_totales = map(lambda p: p.precio_costo * p.stock, productos)
@@ -15,7 +14,6 @@ class InventarioAnalytics:
 
     @staticmethod
     def calcular_valor_total_venta(productos: List[Producto]) -> float:
-        """Calcula el valor proyectado de ventas usando map y reduce."""
         if not productos:
             return 0.0
         ventas_totales = map(lambda p: p.precio_venta * p.stock, productos)
@@ -41,7 +39,6 @@ class InventarioAnalytics:
 
     @staticmethod
     def calcular_estadisticas_numpy(productos: List[Producto]) -> dict:
-        """USO EXPLÍCITO DE NUMPY: Análisis estadístico de precios y margen de ganancia."""
         if not productos:
             return {"costo_promedio": 0.0, "ganancia_promedio": 0.0, "stock_total": 0}
 

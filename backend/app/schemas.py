@@ -12,6 +12,6 @@ class ProductoCreate(BaseModel):
     imagen: Optional[str] = ""
 
 class MovimientoCreate(BaseModel):
-    cantidad: int # Positivo para Entrada (Compra), Negativo para Salida (Venta/Merma)
+    cantidad: int
     motivo: str = Field(description="Ej. Compra a proveedor, Venta, Merma, Devolución")
     usuario: Optional[str] = "Administrador"

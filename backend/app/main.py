@@ -30,7 +30,6 @@ def sembrar_datos_iniciales():
         db.add_all([p1, p2])
         db.commit()
 
-        # Cargar Stock Inicial a través de Movimientos Reales de Kárdex
         for p, cant in [(p1, 10), (p2, 2)]:
             p.stock += cant
             db.add(DBMovimientoKardex(
@@ -59,7 +58,7 @@ def db_to_poo(p_db: DBProducto) -> Producto:
         imagen=p_db.imagen
     )
 
-# --- ENDPOINTS ---
+
 
 @app.get("/api/productos")
 def listar_productos(db: Session = Depends(get_db)):
@@ -74,7 +73,7 @@ def crear_producto(datos: ProductoCreate, db: Session = Depends(get_db)):
         categoria=datos.categoria,
         precio_costo=datos.precio_costo,
         precio_venta=datos.precio_venta,
-        stock=0, # REGLA ESTRICTA: El producto nace con stock 0
+        stock=0,
         min_stock=datos.min_stock,
         max_stock=datos.max_stock,
         imagen=datos.imagen or ""
